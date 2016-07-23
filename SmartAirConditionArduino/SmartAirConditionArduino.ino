@@ -59,10 +59,6 @@ void sendIRCommand(unsigned int command_index)
     rawlen = pgm_read_word_near(pfSendBuff);
     memcpy_P(uSendBuff, pfSendBuff+1, rawlen * sizeof(uint16_t));
     irsend.sendRaw(uSendBuff, rawlen, 38);
-    delay(2500);
-    irsend.sendRaw(uSendBuff, rawlen, 38);
-    delay(2500);
-    irsend.sendRaw(uSendBuff, rawlen, 38);
     //irsend.sendRaw((uint16_t*) pfSendBuff, 131, 38);
   }
 }
@@ -102,6 +98,7 @@ long EEPROMReadlong(long address)
 void setup() {
 
   Serial.begin(9600);
+  
   uint8_t mac[6] = {0x00,0x01,0x02,0x03,0x04,0x05};
   Ethernet.begin(mac);
 
@@ -123,8 +120,8 @@ void setup() {
 
 }
 
-void loop() {
-
+void loop() 
+{
   if (((signed long)(millis() - next)) > 0)
     {
       next = millis() + 5000;
