@@ -2,9 +2,19 @@
 {% autoescape true %}
 <html>
   <head>
+
+    <meta name="MobileOptimized" content="320">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="cleartype" content="on">
+
+    <!-- For iOS web apps. Delete if not needed. https://github.com/h5bp/mobile-boilerplate/issues/94 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="">
+
     <!-- [START css] -->
     <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap.css" rel="stylesheet">
-    <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+    <!-- <link type="text/css" rel="stylesheet" href="/bootstrap/css/bootstrap-responsive.css" rel="stylesheet"> -->
     <!-- [END css] -->
     <style type="text/css">
       body {
@@ -33,7 +43,7 @@
     </style>
   </head>
   <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar navbar-inverse">
       <div class="navbar-inner">
         <div class="container">
           <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
@@ -48,7 +58,26 @@
         </div>
       </div>
     </div>
+
+      <div class="row">
+
+        <div class="span2">
+          <form action="/do?op=on" method="post">
+            <!-- <div><textarea name="content" class="input-block-level" rows="3"></textarea></div> -->
+            <div><input type="submit" class="btn btn-large btn-primary" value="Turn On"></div>
+          </form>
+        </div>
+
+        <div class="span2">
+          <form action="/do?op=off" method="post">
+            <div><input type="submit" class="btn btn-large btn-primary" value="Turn Off"></div>
+          </form>
+        </div>
+
+    </div>
+
     <div class="container">
+
       <!-- [START greetings] -->
       {% for op in ops %}
       <div class="row">
@@ -71,15 +100,6 @@
       </div>
       {% endfor %}
       <!-- [END greetings] -->
-
-      <form action="/do?op=on" method="post">
-        <!-- <div><textarea name="content" class="input-block-level" rows="3"></textarea></div> -->
-        <div><input type="submit" class="btn btn-large btn-primary" value="Turn On"></div>
-      </form>
-
-      <form action="/do?op=off" method="post">
-        <div><input type="submit" class="btn btn-large btn-primary" value="Turn Off"></div>
-      </form>
 
     </div>
   </body>
