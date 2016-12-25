@@ -105,7 +105,7 @@ class DoOperation(webapp2.RequestHandler):
                 identity=users.get_current_user().user_id(),
                 email=users.get_current_user().email())
 
-        airconditionop.state = 1 if self.request.get('op') == 'on' else 0
+        airconditionop.state = int(self.request.get('op'))
         airconditionop.put()
 
         self.redirect('/')

@@ -63,20 +63,48 @@
 
       <div class="row">
 
-        <div class="span2">
-          <form action="/do?op=on" method="post">
-            <!-- <div><textarea name="content" class="input-block-level" rows="3"></textarea></div> -->
-            <div><input type="submit" class="btn btn-large btn-primary" value="Turn On"></div>
-          </form>
-        </div>
-
-        <div class="span2">
-          <form action="/do?op=off" method="post">
+        <div class="span4">
+          <form action="/do?op=0" method="post">
             <div><input type="submit" class="btn btn-large btn-primary" value="Turn Off"></div>
           </form>
         </div>
 
     </div>
+
+    <div class="row">
+
+      <div class="span2">
+        <form action="/do?op=1" method="post">
+          <!-- <div><textarea name="content" class="input-block-level" rows="3"></textarea></div> -->
+          <div><input type="submit" class="btn btn-large btn-info" value="Cold 23"></div>
+        </form>
+      </div>
+
+      <div class="span2">
+        <form action="/do?op=2" method="post">
+          <!-- <div><textarea name="content" class="input-block-level" rows="3"></textarea></div> -->
+          <div><input type="submit" class="btn btn-large btn-info" value="Cold 25"></div>
+        </form>
+      </div>
+
+  </div>
+
+  <div class="row">
+
+    <div class="span2">
+      <form action="/do?op=3" method="post">
+        <div><input type="submit" class="btn btn-large btn-warning" value="Heat 30"></div>
+      </form>
+    </div>
+
+    <div class="span2">
+      <form action="/do?op=4" method="post">
+        <!-- <div><textarea name="content" class="input-block-level" rows="3"></textarea></div> -->
+        <div><input type="submit" class="btn btn-large btn-warning" value="Heat 26"></div>
+      </form>
+    </div>
+
+</div>
 
     <div class="container">
 
@@ -96,8 +124,16 @@
         set
         {% if op.state == 0 %}
         <span>Off</span>
+        {% elif op.state == 1 %}
+        <span>Cold 23</span>
+        {% elif op.state == 2 %}
+        <span>Cold 25</span>
+        {% elif op.state == 3 %}
+        <span>Heat 30</span>
+        {% elif op.state == 4 %}
+        <span>Heat 26</span>
         {% else %}
-        <span>On</span>
+        <span>Unknown</span>
         {% endif %}
       </div>
       {% endfor %}
