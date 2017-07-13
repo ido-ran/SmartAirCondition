@@ -4,3 +4,9 @@ indexes:
   properties:
   - name: date
     direction: desc
+
+- kind: IRFunction
+  ancestor: yes
+  properties:
+  - name: display_order
+    direction: asc

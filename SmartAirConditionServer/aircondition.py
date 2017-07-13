@@ -46,19 +46,27 @@ def aircondition_key(location=DEFAULT_LOCATION):
     return ndb.Key('AirCondition', location)
 
 
-# [START greeting]
+# [START DB classes]
 class UpdateBy(ndb.Model):
     """Sub model for representing an author."""
     identity = ndb.StringProperty(indexed=False)
     email = ndb.StringProperty(indexed=False)
 
+class IRFunction(ndb.Model):
+    """A InfraRed function the user can perform"""
+    name = ndb.StringProperty(indexed=False)
+    ir_code = ndb.StringProperty(indexed=False)
+    visual_type = ndb.StringProperty(indexed=False)
+    display_order = ndb.IntegerProperty(indexed=True)
 
 class AirConditionOp(ndb.Model):
     """A main model for representing an individual Guestbook entry."""
     update_by = ndb.StructuredProperty(UpdateBy)
     state = ndb.IntegerProperty(indexed=False)
     date = ndb.DateTimeProperty(auto_now=True)
-# [END greeting]
+    ir_func_name = ndb.StringProperty(indexed=False)
+    ir_func_key = ndb.KeyProperty(kind=IRFunction)
+# [END DB classes]
 
 
 # [START main_page]
@@ -67,8 +75,12 @@ class MainPage(webapp2.RequestHandler):
     def get(self):
         location = DEFAULT_LOCATION
         ops_query = AirConditionOp.query(
-            ancestor=aircondition_key(location)).order(-AirConditionOp.date)
+            ancestor=aircondition_key()).order(-AirConditionOp.date)
         ops = ops_query.fetch(10)
+
+        ir_funcs_query = IRFunction.query(
+            ancestor=aircondition_key()).order(IRFunction.display_order)
+        ir_funcs = ir_funcs_query.fetch()
 
         user = users.get_current_user()
         if user:
@@ -80,6 +92,7 @@ class MainPage(webapp2.RequestHandler):
 
         template_values = {
             'user': user,
+            'ir_funcs': ir_funcs,
             'ops': ops,
             'url': url,
             'url_linktext': url_linktext,
@@ -94,18 +107,18 @@ class MainPage(webapp2.RequestHandler):
 class DoOperation(webapp2.RequestHandler):
 
     def post(self):
-        # We set the same parent key on the 'Greeting' to ensure each
-        # Greeting is in the same entity group. Queries across the
-        # single entity group will be consistent. However, the write
-        # rate to a single entity group should be limited to
-        # ~1/second.
         airconditionop = AirConditionOp(parent=aircondition_key())
+
+        ir_func_key = ndb.Key(urlsafe=self.request.get('ir_func'))
+        ir_func = ir_func_key.get()
 
         airconditionop.update_by = UpdateBy(
                 identity=users.get_current_user().user_id(),
                 email=users.get_current_user().email())
 
-        airconditionop.state = int(self.request.get('op'))
+        airconditionop.ir_func_name = ir_func.name
+        airconditionop.ir_func_key = ir_func_key
+
         airconditionop.put()
 
         self.redirect('/')
@@ -118,12 +131,51 @@ class Api(webapp2.RequestHandler):
         lastop_query = AirConditionOp.query(
             ancestor=aircondition_key(location)).order(-AirConditionOp.date)
         last_op = lastop_query.get()
-        self.response.write(str(last_op.state) + ' ' + last_op.date.strftime('%S%f'))
+        ir_func = last_op.ir_func_key.get()
+
+        self.response.write(last_op.date.strftime('%S%f'))
+        self.response.write('\r\n')
+        self.response.write(ir_func.ir_code)
+
+class AddIRFunc(webapp2.RequestHandler):
+
+    def post(self):
+        ir_func = IRFunction(
+            parent=aircondition_key(),
+            name = self.request.get('ir_func_name'),
+            ir_code = self.request.get('ir_code'),
+            visual_type = self.request.get('visual_type'),
+            display_order = int(self.request.get('display_order'))
+        )
+
+        ir_func.put()
+
+        self.redirect('/')
+
+def error_handler_middleware(app):
+    """Wraps the application to catch uncaught exceptions."""
+    def wsgi_app(environ, start_response):
+        try:
+            return app(environ, start_response)
+        except Exception, e:
+            logging.exception(e)
+            # ... display a custom error message ...
+            response = webapp.Response()
+            response.set_status(500)
+            response.out.write('Ooops! An error occurred...')
+            response.wsgi_write(start_response)
+            return ['']
+
+    return wsgi_app
 
 # [START app]
 app = webapp2.WSGIApplication([
     ('/', MainPage),
     ('/do', DoOperation),
+    ('/add_ir_func', AddIRFunc),
     ('/api', Api),
 ], debug=True)
+
+app = error_handler_middleware(app)
+
 # [END app]

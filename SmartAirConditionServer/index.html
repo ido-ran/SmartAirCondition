@@ -61,50 +61,23 @@
       </div>
     </div>
 
+    {% for ir_func in ir_funcs %}
+
+    <div class="container">
+
       <div class="row">
 
-        <div class="span4">
-          <form action="/do?op=0" method="post">
-            <div><input type="submit" class="btn btn-large btn-primary" value="Turn Off"></div>
-          </form>
-        </div>
+          <div class="span2">
+            <form action="/do?ir_func={{ ir_func.key.urlsafe() }}" method="post">
+              <div><input type="submit" class="btn btn-large btn-{{ ir_func.visual_type }}" value="{{ ir_func.name }}"></div>
+            </form>
+          </div>
 
-    </div>
-
-    <div class="row">
-
-      <div class="span2">
-        <form action="/do?op=1" method="post">
-          <!-- <div><textarea name="content" class="input-block-level" rows="3"></textarea></div> -->
-          <div><input type="submit" class="btn btn-large btn-info" value="Cold 23"></div>
-        </form>
       </div>
 
-      <div class="span2">
-        <form action="/do?op=2" method="post">
-          <!-- <div><textarea name="content" class="input-block-level" rows="3"></textarea></div> -->
-          <div><input type="submit" class="btn btn-large btn-info" value="Cold 25"></div>
-        </form>
-      </div>
-
-  </div>
-
-  <div class="row">
-
-    <div class="span2">
-      <form action="/do?op=3" method="post">
-        <div><input type="submit" class="btn btn-large btn-warning" value="Heat 30"></div>
-      </form>
     </div>
 
-    <div class="span2">
-      <form action="/do?op=4" method="post">
-        <!-- <div><textarea name="content" class="input-block-level" rows="3"></textarea></div> -->
-        <div><input type="submit" class="btn btn-large btn-warning" value="Heat 26"></div>
-      </form>
-    </div>
-
-</div>
+    {% endfor %}
 
     <div class="container">
 
@@ -122,24 +95,36 @@
         {% endif %}
         {{ op.date.strftime('%Y-%m-%d %H:%M') }}
         set
-        {% if op.state == 0 %}
-        <span>Off</span>
-        {% elif op.state == 1 %}
-        <span>Cold 23</span>
-        {% elif op.state == 2 %}
-        <span>Cold 25</span>
-        {% elif op.state == 3 %}
-        <span>Heat 30</span>
-        {% elif op.state == 4 %}
-        <span>Heat 26</span>
-        {% else %}
-        <span>Unknown</span>
-        {% endif %}
+        {{ op.ir_func_name }}
       </div>
       {% endfor %}
       <!-- [END greetings] -->
 
     </div>
+
+
+    <div class="row">
+
+        <div class="span4">
+          <form action="/add_ir_func" method="post">
+            <div>
+              <input type="text" name="ir_func_name" placeholder="name of function" />
+              <select name="visual_type">
+                <option value="info">Cyna</option>
+                <option value="warning">Orange</option>
+                <option value="success">Green</option>
+                <option value="danger">Red</option>
+                <option value="primary">Blue</option>
+              </select>
+              <input type="number" name="display_order" placeholder="order" />
+              <textarea type="text" name="ir_code" rows="10" cols="90"></textarea>
+              <input type="submit" class="btn btn-large btn-primary" value="Add New">
+            </div>
+          </form>
+        </div>
+
+    </div>
+
   </body>
 </html>
 {% endautoescape %}
