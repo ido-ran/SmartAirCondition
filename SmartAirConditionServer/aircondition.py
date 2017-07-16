@@ -133,6 +133,7 @@ class Api(webapp2.RequestHandler):
         last_op = lastop_query.get()
         ir_func = last_op.ir_func_key.get()
 
+        self.response.headers["Content-Type"] = "text/plain"
         self.response.write(last_op.date.strftime('%S%f'))
         self.response.write('\r\n')
         self.response.write(ir_func.ir_code)
