@@ -26,44 +26,60 @@ const char server[] = "ran-smart-home.appspot.com"; // IP Adres (or name) of ser
 unsigned long last_etag = 0;
 unsigned int fail_count = 0;
 IRsend irsend(4);
-uint16_t uSendBuff[131];
 
-// Raw IR buffers pre-configured with A/C commands (see ac_ir_analysis.py Python script)
-// stored in Flash! (it's too much for to 2KB of SRAM we have..)
-PROGMEM const uint16_t  COOL_23[132] = {131, 7900,4200, 1700,650, 600,1750, 650,1700, 550,1800, 550,1750, 600,1750, 650,1750, 600,1700, 1700,650, 550,1800, 650,1700, 550,1750, 1750,600, 1750,600, 600,1750, 600,1750, 550,1800, 550,1800, 550,1750, 600,1750, 1750,650, 1650,650, 600,1750, 650,1700, 550,1800, 550,1750, 600,1750, 600,1800, 550,1750, 600,1750, 550,1800, 550,1800, 550,1800, 550,1750, 600,1800, 550,1750, 600,1750, 550,1800, 550,1800, 550,1800, 600,1700, 600,1800, 550,1750, 600,1750, 1700,650, 1700,650, 550,1800, 550,1800, 550,1750, 600,1750, 600,1750, 550,1800, 550,1800, 550,1800, 550,1750, 600,1800, 1750,550, 1700,650, 600,1750, 1700,650, 550,1800, 600,1700, 600,1800, 550,1750, 1600};  // UNKNOWN D6A905FB
-PROGMEM const uint16_t  COOL_25[132] = {131, 7850,4250, 1750,650, 550,1750, 600,1750, 600,1750, 600,1750, 600,1750, 600,1700, 650,1750, 1700,650, 600,1700, 600,1750, 600,1750, 1750,650, 550,1750, 600,1750, 600,1750, 600,1750, 1700,650, 600,1700, 600,1750, 1750,650, 1700,650, 550,1750, 600,1750, 600,1750, 600,1750, 600,1750, 600,1700, 600,1750, 600,1750, 600,1750, 600,1750, 600,1750, 600,1750, 600,1750, 600,1700, 600,1800, 600,1750, 600,1700, 600,1750, 600,1750, 600,1750, 600,1750, 600,1750, 1750,650, 1700,600, 600,1700, 650,1700, 600,1750, 600,1750, 600,1700, 650,1750, 600,1750, 600,1750, 600,1750, 600,1750, 1750,600, 1700,650, 600,1700, 1750,650, 550,1750, 600,1750, 600,1700, 650,1750, 1600};  // UNKNOWN 3B7F5B7B
-PROGMEM const uint16_t  HEAT_30[132] = {131, 7850,4250, 1750,650, 550,1750, 600,1750, 600,1700, 650,1750, 600,1750, 600,1700, 600,1750, 600,1750, 1750,600, 600,1750, 600,1750, 600,1750, 600,1750, 1700,650, 550,1800, 550,1750, 600,1750, 1750,600, 1750,650, 1700,650, 1700,650, 550,1750, 600,1750, 550,1750, 650,1750, 600,1700, 600,1750, 600,1750, 600,1750, 600,1750, 600,1750, 600,1750, 600,1750, 600,1750, 550,1750, 600,1750, 600,1750, 600,1750, 600,1750, 600,1750, 600,1750, 600,1750, 600,1750, 1750,550, 1750,600, 650,1700, 600,1750, 600,1750, 600,1750, 600,1750, 600,1750, 600,1700, 650,1750, 600,1750, 550,1750, 1750,650, 550,1750, 600,1750, 1750,600, 1750,650, 550,1750, 600,1750, 600,1750, 1600};  // UNKNOWN 30BAF5AF
-PROGMEM const uint16_t  OFF[132] = {131, 7850,4250, 1750,600, 600,1750, 600,1750, 600,1750, 600,1750, 600,1700, 600,1750, 600,1750, 1750,600, 600,1750, 600,1750, 600,1750, 600,1750, 600,1750, 1750,600, 550,1800, 600,1750, 1700,650, 1700,600, 1750,600, 600,1750, 1750,600, 600,1750, 600,1750, 600,1750, 600,1700, 600,1750, 600,1750, 600,1750, 600,1750, 600,1700, 650,1750, 600,1750, 600,1700, 600,1700, 650,1700, 650,1750, 600,1750, 600,1700, 650,1750, 600,1750, 600,1750, 600,1750, 550,1750, 650,1750, 600,1650, 1800,650, 1700,600, 600,1750, 600,1750, 600,1700, 650,1750, 600,1750, 600,1750, 600,1700, 600,1800, 550,1750, 1750,600, 600,1750, 600,1750, 600,1750, 1700,650, 600,1750, 550,1700, 1700};  // UNKNOWN 821ABB3
-PROGMEM const uint16_t  HEAT_26[132] = {131, 7850, 4250, 1700, 650, 600, 1700, 600, 1750, 600, 1750, 650, 1700, 600, 1750, 600, 1750, 600, 1750, 600, 1750, 1750, 600, 550, 1750, 650, 1750, 1700, 650, 550, 1750, 600, 1750, 600, 1750, 600, 1700, 600, 1750, 1750, 650, 600, 1700, 1750, 650, 1700, 650, 550, 1800, 550, 1750, 600, 1700, 650, 1750, 600, 1750, 600, 1700, 600, 1750, 600, 1750, 600, 1750, 600, 1750, 600, 1750, 600, 1700, 650, 1750, 550, 1750, 600, 1750, 600, 1750, 600, 1750, 600, 1750, 600, 1750, 600, 1750, 600, 1700, 600, 1750, 1750, 650, 1700, 650, 550, 1750, 600, 1750, 600, 1750, 600, 1700, 600, 1750, 600, 1750, 600, 1750, 600, 1750, 600, 1750, 600, 1750, 600, 1750, 1750, 600, 1700, 650, 1700, 650, 550, 1750, 600, 1750, 600, 1750, 600, 1750, 1600};
+uint16_t ir_command_length = 0;
+uint16_t ir_command[200];
 
-const uint16_t * getAcSendBuff(unsigned int index) {
-  if ( index == 1 ) { return COOL_23; /* D6A905FB */ }
-  if ( index == 2 ) { return COOL_25; /* 3B7F5B7B */ }
-  if ( index == 3 ) { return HEAT_30; }
-  if ( index == 4 ) { return HEAT_26; }
-  if ( index == 0 ) { return OFF; }
-  return 0;
+void parseIntFromString(String commandStr, int cmdLength, int &startIndex, int &value)
+{
+  value = 0;
+  while (startIndex < cmdLength)
+  {
+    char c = commandStr.charAt(startIndex++);
+    //USE_SERIAL.printf("char at %d is %c\n", startIndex, c);
+    
+    if (c >= '0' && c <= '9')
+    {
+      value *= 10;
+      value += c - '0';
+    } else
+    {
+      // reach non-digit character
+      break;
+    }
+  }
 }
 
-void sendIRCommand(unsigned int command_index)
+void readIRCommand(String commandStr, int startIndex)
 {
-  const uint16_t *pfSendBuff = getAcSendBuff(command_index);
-  if (pfSendBuff == 0)
+  // first parse the command length
+  int currIndex = startIndex;
+  int value = 0;
+  int commandLength = commandStr.length();
+  parseIntFromString(commandStr, commandLength, currIndex, value);
+  ir_command_length = value;
+
+  Serial.print( F("read command length - ") );
+  Serial.println(value);
+
+  // then parse mark and spaces
+  int arrIndex = 0;
+  while (currIndex < commandLength)
   {
-    Serial.print( F("unsupported IR command - ") );
-    Serial.println(command_index);
+    parseIntFromString(commandStr, commandLength, currIndex, value);
+    ir_command[arrIndex++] = value;
+
+    Serial.print(value);
+    Serial.print( F(", ") );
   }
-  else
-  {
-    Serial.print( F("Sending IR command - ") );
-    Serial.println(command_index);
-    
-    uint16_t rawlen = 0;
-    rawlen = pgm_read_word_near(pfSendBuff);
-    memcpy_P(uSendBuff, pfSendBuff+1, rawlen * sizeof(uint16_t));
-    irsend.sendRaw(uSendBuff, rawlen, 38);
-    //irsend.sendRaw((uint16_t*) pfSendBuff, 131, 38);
-  }
+  Serial.println();
+}
+
+void sendIRCommand()
+{
+  USE_SERIAL.print("[IR] Sending IR command...\n");
+  irsend.sendRaw(ir_command, ir_command_length, 38);
+  //irsend.sendRaw((uint16_t*) pfSendBuff, 131, 38);
 }
 
 //This function will write a 4 byte (32bit) long to the eeprom at
@@ -148,24 +164,36 @@ void loop() {
               String payload = http.getString();
               USE_SERIAL.println(payload);
 
-              char buffer[10];
-              payload.toCharArray(buffer, sizeof(buffer));
-              unsigned long etag = strtoul(buffer + 2, NULL, 10);
-              Serial.print( F("curr etag ") );
-              Serial.print(etag);
-              Serial.print( F("  last etag ") );
-              Serial.print(last_etag);
-              Serial.println();
-              if (etag == last_etag)
-              {
-                Serial.println( F("same etag, ignoring...") );
-              }
-              else
-              {
-                last_etag = etag;
-                EEPROMWritelong(LAST_ETAG_ADDRESS, last_etag);
-                unsigned int command_index = buffer[0] - '0';
-                sendIRCommand(command_index);          
+              int newLineIndex = 0;
+              int etag = 0;
+              parseIntFromString(payload, payload.length(), newLineIndex, etag);
+
+              if (newLineIndex != -1) {
+                Serial.print( F("curr etag ") );
+                Serial.print(etag);
+                Serial.print( F("  last etag ") );
+                Serial.print(last_etag);
+                Serial.println();
+
+                // last_etag is zero on first read (need to check why eeprom is not storing it or reading it)
+                if (last_etag == 0)
+                {
+                  Serial.println( F("first time, not sending command just storing etag") );
+                  last_etag = etag;
+                  EEPROMWritelong(LAST_ETAG_ADDRESS, last_etag);
+                }
+                else if (etag == last_etag)
+                {
+                  Serial.println( F("same etag, ignoring...") );
+                }
+                else
+                {
+                  last_etag = etag;
+                  EEPROMWritelong(LAST_ETAG_ADDRESS, last_etag);
+
+                  readIRCommand(payload, newLineIndex + 1 /* +1 for /n */);
+                  sendIRCommand();          
+                }
               }
           }
       } else {
