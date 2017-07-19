@@ -27,6 +27,11 @@ unsigned long last_etag = 0;
 unsigned int fail_count = 0;
 IRsend irsend(4);
 
+/**
+ * Store the etag of the last executed command.
+ * This is the actual command that was sent using the IR LED.
+ */
+unsigned long last_executed_etag = 0;
 uint16_t ir_command_length = 0;
 uint16_t ir_command[200];
 
@@ -152,9 +157,15 @@ void loop() {
       USE_SERIAL.print("[HTTP] begin...\n");
       // configure traged server and url
       //http.begin("https://192.168.1.12/test.html", "7a 9c f4 db 40 d3 62 5a 6e 21 bc 5c cc 66 c8 3e a1 45 59 38"); //HTTPS
-      http.begin("http://ran-smart-home.appspot.com/api"); //HTTP
+      String serverAddress = "http://ran-smart-home.appspot.com/api?last_ececuted_etag=";
+      serverAddress += last_executed_etag;
+      
+      http.begin(serverAddress); //HTTP
 
-      USE_SERIAL.print("[HTTP] GET...\n");
+      USE_SERIAL.print("[HTTP] GET ");
+      USE_SERIAL.print(serverAddress);
+      USE_SERIAL.print("...\n");
+      
       // start connection and send HTTP header
       int httpCode = http.GET();
 
@@ -179,9 +190,9 @@ void loop() {
                 Serial.print(last_etag);
                 Serial.println();
 
-                // last_etag is zero on first read (need to check why eeprom is not storing it or reading it)
                 if (last_etag == 0)
                 {
+                  // last_etag is zero on first read (need to check why eeprom is not storing it or reading it)
                   Serial.println( F("first time, not sending command just storing etag") );
                   last_etag = etag;
                   EEPROMWritelong(LAST_ETAG_ADDRESS, last_etag);
@@ -192,7 +203,7 @@ void loop() {
                 }
                 else
                 {
-                  last_etag = etag;
+                  last_executed_etag = last_etag = etag;
                   EEPROMWritelong(LAST_ETAG_ADDRESS, last_etag);
 
                   readIRCommand(payload, newLineIndex + 1 /* +1 for /n */);
