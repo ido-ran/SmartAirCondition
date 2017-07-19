@@ -98,6 +98,8 @@ void EEPROMWritelong(int address, long value)
   EEPROM.write(address + 1, three);
   EEPROM.write(address + 2, two);
   EEPROM.write(address + 3, one);
+
+  EEPROM.commit();
 }
 
 //This function will return a 4 byte (32bit) long from the eeprom
@@ -120,6 +122,8 @@ ESP8266WiFiMulti WiFiMulti;
 void setup() {
 
   irsend.begin();
+
+  EEPROM.begin(512);
   
   USE_SERIAL.begin(115200);
  // USE_SERIAL.setDebugOutput(true);
